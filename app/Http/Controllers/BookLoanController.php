@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Book;
 use App\Models\BookLoan;
-use App\Notifications\BookReturned;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\BookBorrowed;
+use App\Notifications\BookReturned;
 
 class BookLoanController extends Controller
 {
@@ -32,19 +33,23 @@ class BookLoanController extends Controller
         try {
             DB::transaction(function () use ($book) {
                 // Create loan record
-                BookLoan::create([
+                $loan = BookLoan::create([
                     'user_id' => auth()->id(),
                     'book_id' => $book->id,
                     'borrowed_date' => now(),
-                    'due_date' => now()->addDays(14), // 2 weeks loan period
+                    'due_date' => now()->addDays(14),
                 ]);
 
                 // Update book availability
                 $book->update(['is_available' => false]);
+
+                // Send notification immediately
+                auth()->user()->notify(new BookBorrowed($book, $loan));
             });
 
             return back()->with('success', 'Book borrowed successfully. Due date is ' . now()->addDays(14)->format('Y-m-d'));
         } catch (\Exception $e) {
+            \Log::error('Loan creation failed: ' . $e->getMessage());
             return back()->with('error', 'An error occurred while processing your request.');
         }
     }

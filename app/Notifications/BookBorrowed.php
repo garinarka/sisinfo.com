@@ -9,12 +9,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BookBorrowed extends Notification implements ShouldQueue
+class BookBorrowed extends Notification
 {
     use Queueable;
 
-    protected $book;
-    protected $loan;
+    public $book;
+    public $loan;
 
     public function __construct(Book $book, BookLoan $loan)
     {
@@ -24,17 +24,19 @@ class BookBorrowed extends Notification implements ShouldQueue
 
     public function via($notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
-    public function toMail($notifiable): MailMessage
+    public function toDatabase($notifiable): array
     {
-        return (new MailMessage)
-            ->subject('Book Borrowed - ' . $this->book->title)
-            ->line('You have borrowed the book: ' . $this->book->title)
-            ->line('Due date: ' . $this->loan->due_date->format('Y-m-d'))
-            ->action('View Book Details', route('books.show', $this->book))
-            ->line('Please return the book before the due date.');
+        return [
+            'message' => 'You have borrowed "' . $this->book->title . '"',
+            'book_id' => $this->book->id,
+            'loan_id' => $this->loan->id,
+            'due_date' => $this->loan->due_date,
+            'type' => 'book_borrowed',
+            'url' => route('books.show', $this->book)
+        ];
     }
 
     public function toArray($notifiable): array
@@ -44,7 +46,8 @@ class BookBorrowed extends Notification implements ShouldQueue
             'book_id' => $this->book->id,
             'loan_id' => $this->loan->id,
             'due_date' => $this->loan->due_date,
-            'type' => 'book_borrowed'
+            'type' => 'book_borrowed',
+            'url' => route('books.show', $this->book)
         ];
     }
 }
