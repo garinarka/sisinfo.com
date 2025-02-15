@@ -18,9 +18,9 @@ class DashboardController extends Controller
                 ->where('due_date', '<=', now())
                 ->count(),
             'recentActivity' => BookLoan::with(['book', 'user'])
-                ->latest()
-                ->take(5)
-                ->get(),
+                ->where('user_id', auth()->id())
+                ->orderByRaw('COALESCE(returned_date, borrowed_date) DESC')
+                ->paginate(10),
         ];
 
         return view('dashboard', $data);

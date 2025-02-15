@@ -120,58 +120,89 @@
             <!-- Recent Activity Section -->
             <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Activity</h3>
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+                        {{ __('Recent Activity') }}
+                    </h3>
+
+                    @if($recentActivity->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th scope="col"
                                         class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                        Book</th>
+                                        {{ __('Book') }}
+                                    </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                        Action</th>
+                                        {{ __('Activity') }}
+                                    </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                        User</th>
+                                        {{ __('Date') }}
+                                    </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                        Date</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                        Status</th>
+                                        {{ __('Status') }}
+                                    </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                @forelse($recentActivity ?? [] as $activity)
+                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-600">
+                                @foreach($recentActivity as $activity)
                                 <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">{{
-                                        $activity->book->title }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{
-                                        $activity->action }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">{{
-                                        $activity->user->name }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{
-                                        $activity->created_at->format('M d, Y') }}</td>
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-gray-100">
+                                        <a href="{{ route('books.show', $activity->book) }}"
+                                            class="hover:text-blue-600 dark:hover:text-blue-400">
+                                            {{ $activity->book->title }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
+                                        @if($activity->returned_date)
+                                        {{ __('Returned') }}
+                                        @else
+                                        {{ __('Borrowed') }}
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
+                                        @if($activity->returned_date)
+                                        {{ $activity->returned_date->format('Y-m-d H:i') }}
+                                        @else
+                                        {{ $activity->borrowed_date->format('Y-m-d H:i') }}
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($activity->returned_date)
                                         <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                {{ $activity->status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900' :
-                                                   'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900' }}">
-                                            {{ ucfirst($activity->status) }}
+                                            class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full dark:bg-green-200 dark:text-green-900">
+                                            {{ __('Completed') }}
                                         </span>
+                                        @elseif($activity->due_date->isPast())
+                                        <span
+                                            class="inline-flex px-2 text-xs font-semibold leading-5 text-red-800 bg-red-100 rounded-full dark:bg-red-200 dark:text-red-900">
+                                            {{ __('Overdue') }}
+                                        </span>
+                                        @else
+                                        <span
+                                            class="inline-flex px-2 text-xs font-semibold leading-5 text-yellow-800 bg-yellow-100 rounded-full dark:bg-yellow-200 dark:text-yellow-900">
+                                            {{ __('Active') }}
+                                        </span>
+                                        @endif
                                     </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5"
-                                        class="px-6 py-4 text-sm text-center text-gray-500 whitespace-nowrap dark:text-gray-400">
-                                        No recent activity</td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
+
+                    @if($recentActivity->hasPages())
+                    <div class="mt-4">
+                        {{ $recentActivity->links() }}
+                    </div>
+                    @endif
+                    @else
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('No recent activity.') }}</p>
+                    @endif
                 </div>
             </div>
         </div>
