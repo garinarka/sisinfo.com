@@ -71,6 +71,9 @@ class BookLoanController extends Controller
 
                 // Make book available again
                 $loan->book->update(['is_available' => true]);
+
+                // Send notification
+                $loan->user->notify(new BookReturned($loan->book, $loan));
             });
 
             return back()->with('success', 'Book returned successfully.');
