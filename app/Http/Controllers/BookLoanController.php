@@ -4,90 +4,78 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookLoan;
-use App\Models\User;
-use App\Notifications\BookBorrowed;
-use App\Notifications\BookDueReminder;
-use Illuminate\Http\Request;
+use App\Notifications\BookReturned;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookLoanController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'book_id' => 'required|exists:books,id',
-            'due_date' => 'required|date|after:today'
-        ]);
+        $book = Book::findOrFail($request->book_id);
 
-        $book = Book::findOrFail($validated['book_id']);
-
-        if (!$book->is_available || $book->quantity <= 0) {
-            return back()->with('error', 'Book is not available for loan.');
+        // Check if book is available
+        if (!$book->is_available) {
+            return back()->with('error', 'This book is currently not available for borrowing.');
         }
 
-        $bookLoan = BookLoan::create([
-            'user_id' => auth()->id(),
-            'book_id' => $book->id,
-            'borrowed_date' => Carbon::now(),
-            'due_date' => $validated['due_date'],
-            'status' => 'borrowed'
-        ]);
+        // Check if user has reached maximum allowed loans
+        $activeLoans = BookLoan::where('user_id', auth()->id())
+            ->whereNull('returned_date')
+            ->count();
 
-        $book->decrement('quantity');
-        $book->update(['is_available' => $book->quantity > 0]);
-
-        // Notify admins and operators
-        $adminsAndOperators = User::whereHas('role', function ($query) {
-            $query->whereIn('name', ['admin', 'operator']);
-        })->get();
-
-        foreach ($adminsAndOperators as $user) {
-            $user->notify(new BookBorrowed($bookLoan));
+        if ($activeLoans >= 3) { // Maximum 3 books at a time
+            return back()->with('error', 'You have reached the maximum number of allowed loans.');
         }
 
-        return redirect()->route('books.index')
-            ->with('success', 'Book borrowed successfully.');
+        try {
+            DB::transaction(function () use ($book) {
+                // Create loan record
+                BookLoan::create([
+                    'user_id' => auth()->id(),
+                    'book_id' => $book->id,
+                    'borrowed_date' => now(),
+                    'due_date' => now()->addDays(14), // 2 weeks loan period
+                ]);
+
+                // Update book availability
+                $book->update(['is_available' => false]);
+            });
+
+            return back()->with('success', 'Book borrowed successfully. Due date is ' . now()->addDays(14)->format('Y-m-d'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred while processing your request.');
+        }
     }
 
-    public function return(BookLoan $bookLoan)
+    public function return(BookLoan $loan)
     {
-        $this->authorize('return', $bookLoan);
+        if ($loan->user_id !== auth()->id() && !auth()->user()->hasRole(['admin', 'operator'])) {
+            abort(403, 'Unauthorized action.');
+        }
 
-        $bookLoan->update([
-            'returned_date' => Carbon::now(),
-            'status' => 'returned'
-        ]);
+        if ($loan->returned_date) {
+            return back()->with('error', 'This book has already been returned.');
+        }
 
-        $bookLoan->book->increment('quantity');
-        $bookLoan->book->update(['is_available' => true]);
+        try {
+            DB::transaction(function () use ($loan) {
+                // Mark loan as returned
+                $loan->update([
+                    'returned_date' => now(),
+                ]);
 
-        return redirect()->route('loans.index')
-            ->with('success', 'Book returned successfully.');
-    }
+                // Make book available again
+                $loan->book->update(['is_available' => true]);
 
-    public function checkDueBooks()
-    {
-        $dueSoonLoans = BookLoan::where('status', 'borrowed')
-            ->whereDate('due_date', '=', Carbon::tomorrow())
-            ->get();
+                // Send notification
+                $loan->user->notify(new BookReturned($loan->book, $loan));
+            });
 
-        foreach ($dueSoonLoans as $loan) {
-            // Notify borrower
-            $loan->user->notify(new BookDueReminder($loan));
-
-            // Notify admins and operators
-            $adminsAndOperators = User::whereHas('role', function ($query) {
-                $query->whereIn('name', ['admin', 'operator']);
-            })->get();
-
-            foreach ($adminsAndOperators as $user) {
-                $user->notify(new BookDueReminder($loan));
-            }
+            return back()->with('success', 'Book returned successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred while processing your request.');
         }
     }
 }

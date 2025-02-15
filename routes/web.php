@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/mark-as-read', [Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('/notifications/mark-all-as-read', [Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
+    // Loan
+    Route::post('/loans', [Controllers\BookLoanController::class, 'store'])->name('loans.store');
+    Route::post('/loans/{loan}/return', [Controllers\BookLoanController::class, 'return'])->name('loans.return');
 });
 
 require __DIR__ . '/auth.php';
