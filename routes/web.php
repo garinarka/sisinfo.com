@@ -15,17 +15,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::middleware(['auth'])->group(function () {
     // Books
     Route::resource('books', Controllers\BookController::class);
 
-    // Book Loans
-    Route::post('/loans', [Controllers\BookLoanController::class, 'store'])->name('loans.store');
-    Route::patch('/loans/{bookLoan}/return', [Controllers\BookLoanController::class, 'return'])
-        ->name('loans.return')
-        ->middleware('can:return,bookLoan');
+    // Specific middleware for specific actions
+    Route::middleware(['role:admin,operator'])->group(function () {
+        Route::post('books', [Controllers\BookController::class, 'store'])->name('books.store');
+        Route::put('books/{book}', [Controllers\BookController::class, 'update'])->name('books.update');
+        Route::delete('books/{book}', [Controllers\BookController::class, 'destroy'])->name('books.destroy');
+    });
 
     // Notifications
     Route::get('/notifications', function () {

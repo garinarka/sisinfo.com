@@ -4,17 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookController extends Controller
 {
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->middleware('auth');
-    }
+        $query = Book::query();
 
-    public function index()
-    {
-        $books = Book::all();
+        // Search
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('author', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%");
+            });
+        }
+
+        // Availability Filter
+        if ($request->has('availability')) {
+            if ($request->availability === 'available') {
+                $query->where('is_available', true);
+            } elseif ($request->availability === 'borrowed') {
+                $query->where('is_available', false);
+            }
+        }
+
+        // Sorting
+        switch ($request->sort) {
+            case 'author':
+                $query->orderBy('author');
+                break;
+            case 'newest':
+                $query->latest();
+                break;
+            default:
+                $query->orderBy('title');
+        }
+
+        $books = $query->paginate(10)->withQueryString();
+
         return view('books.index', compact('books'));
     }
 
