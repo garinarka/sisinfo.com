@@ -50,25 +50,34 @@ class BookController extends Controller
 
     public function create()
     {
-        $this->authorize('create', Book::class);
+        if (!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('operator')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         return view('books.create');
     }
 
+    /**
+     * Store a newly created book in storage.
+     */
     public function store(Request $request)
     {
-        $this->authorize('create', Book::class);
+        if (!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('operator')) {
+            abort(403, 'Unauthorized action.');
+        }
 
         $validated = $request->validate([
-            'title' => 'required|max::255',
-            'author' => 'required|max::255',
-            'isbn' => 'required|unique:books',
-            'description' => 'nullable',
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'isbn' => 'required|string|max:13|unique:books',
             'quantity' => 'required|integer|min:0',
+            'description' => 'nullable|string'
         ]);
 
-        Book::create($validated);
+        $book = Book::create($validated);
 
-        return redirect()->route('books.index')
+        return redirect()
+            ->route('books.index')
             ->with('success', 'Book created successfully.');
     }
 
