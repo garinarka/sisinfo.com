@@ -121,4 +121,35 @@ class BookController extends Controller
             ->route('books.show', $book)
             ->with('success', 'Book updated successfully.');
     }
+
+    /**
+     * Remove the specified book from storage.
+     */
+    public function destroy(Book $book)
+    {
+        if (!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('operator')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            // Check if book has any active loans
+            if ($book->bookLoans()->where('returned_date', null)->exists()) {
+                return redirect()
+                    ->route('books.show', $book)
+                    ->with('error', 'Cannot delete book. There are active loans for this book.');
+            }
+
+            $title = $book->title; // Store title before deletion for success message
+            $book->delete();
+
+            return redirect()
+                ->route('books.index')
+                ->with('success', "Book '$title' has been successfully deleted.");
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('books.show', $book)
+                ->with('error', 'An error occurred while deleting the book. Please try again.');
+        }
+    }
 }
