@@ -109,7 +109,8 @@
                             @empty
                             <p class="text-sm text-gray-500 dark:text-gray-400">No new notifications</p>
                             @endforelse
-                            <a href="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">View all
+                            <a href="{{ route('notifications.index') }}"
+                                class="text-sm text-blue-600 dark:text-blue-400 hover:underline">View all
                                 notifications</a>
                         </div>
                     </div>
