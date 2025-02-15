@@ -26,10 +26,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('books/{book}', [Controllers\BookController::class, 'destroy'])->name('books.destroy');
     });
 
-    // Notifications
-    Route::get('/notifications', function () {
-        return view('notifications.index');
-    })->name('notifications.index');
+    // Notification
+    Route::get('/notifications', [Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/mark-as-read', [Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/mark-all-as-read', [Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
 
 require __DIR__ . '/auth.php';

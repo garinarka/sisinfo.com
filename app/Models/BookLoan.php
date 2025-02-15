@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Notifications\BookBorrowed;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BookLoan extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'book_id',
@@ -19,13 +17,20 @@ class BookLoan extends Model
         'status',
     ];
 
-    protected $dates = [
-        'borrowed_date',
-        'due_date',
-        'returned_date',
+    protected $casts = [
+        'borrowed_date' => 'datetime',
+        'due_date' => 'datetime',
+        'returned_date' => 'datetime',
     ];
 
-    public function user()
+    protected static function booted()
+    {
+        static::created(function ($loan) {
+            $loan->user->notify(new BookBorrowed($loan->book, $loan));
+        });
+    }
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

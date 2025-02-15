@@ -26,4 +26,5 @@ return Application::configure(basePath: dirname(__DIR__))
             $controller = new BookLoanController();
             $controller->checkDueBooks();
         })->daily();
+        $schedule->command('library:send-due-reminders')->daily();
     })->create();
