@@ -85,4 +85,40 @@ class BookController extends Controller
     {
         return view('books.show', compact('book'));
     }
+
+    /**
+     * Show the form for editing the specified book.
+     */
+    public function edit(Book $book)
+    {
+        if (!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('operator')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('books.edit', compact('book'));
+    }
+
+    /**
+     * Update the specified book in storage.
+     */
+    public function update(Request $request, Book $book)
+    {
+        if (!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('operator')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'isbn' => 'required|string|max:13|unique:books,isbn,' . $book->id,
+            'quantity' => 'required|integer|min:0',
+            'description' => 'nullable|string'
+        ]);
+
+        $book->update($validated);
+
+        return redirect()
+            ->route('books.show', $book)
+            ->with('success', 'Book updated successfully.');
+    }
 }
