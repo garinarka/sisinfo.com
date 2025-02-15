@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\BookBorrowed;
 use App\Notifications\BookReturned;
+use Log;
 
 class BookLoanController extends Controller
 {
@@ -42,9 +43,6 @@ class BookLoanController extends Controller
 
                 // Update book availability
                 $book->update(['is_available' => false]);
-
-                // Send notification immediately
-                auth()->user()->notify(new BookBorrowed($book, $loan));
             });
 
             return back()->with('success', 'Book borrowed successfully. Due date is ' . now()->addDays(14)->format('Y-m-d'));
@@ -73,13 +71,11 @@ class BookLoanController extends Controller
 
                 // Make book available again
                 $loan->book->update(['is_available' => true]);
-
-                // Send notification
-                $loan->user->notify(new BookReturned($loan->book, $loan));
             });
 
             return back()->with('success', 'Book returned successfully.');
         } catch (\Exception $e) {
+            Log::error('Book return failed: ' . $e->getMessage());
             return back()->with('error', 'An error occurred while processing your request.');
         }
     }
