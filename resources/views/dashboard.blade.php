@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            {{ __('Dashboard') }}
+            {{ __('These are your details, ') . $user->name }}
         </h2>
     </x-slot>
 
@@ -9,6 +9,7 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Quick Stats Section -->
             <div class="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-4">
+                @if ($user->hasRole('admin') || $user->hasRole('operator'))
                 <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Books</div>
@@ -18,7 +19,7 @@
 
                 <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
                     <div class="p-6">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Books Borrowed</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Borrowed</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $borrowedBooks ?? 0 }}</div>
                     </div>
                 </div>
@@ -37,6 +38,36 @@
                         <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $dueReturns ?? 0 }}</div>
                     </div>
                 </div>
+                @else
+                <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Currently Borrowed</div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $borrowedBooks ?? 0 }}</div>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Books Returned</div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $returnedBooks ?? 0 }}</div>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Available Books</div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $availableBooks ?? 0 }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Overdue Books</div>
+                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $overdueBooks ?? 0 }}</div>
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Quick Actions Section -->
@@ -45,7 +76,7 @@
                     <div class="p-6">
                         <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Actions</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('operator'))
+                            @if ($user->hasRole('admin') || $user->hasRole('operator'))
                             <a href="{{ route('books.create') }}"
                                 class="inline-flex items-center justify-center px-4 py-2 text-white transition bg-blue-600 rounded-lg dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
