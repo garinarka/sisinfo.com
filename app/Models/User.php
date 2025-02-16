@@ -59,8 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(BookLoan::class);
     }
 
-    public function hasRole($role): bool
+    public function hasRole($roles): bool
     {
-        return $this->role->name === $role;
+        if (is_array($roles)) {
+            return in_array($this->role->name, $roles);
+        }
+        return $this->role->name === $roles;
     }
 }
