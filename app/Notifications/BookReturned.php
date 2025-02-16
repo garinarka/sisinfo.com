@@ -14,11 +14,13 @@ class BookReturned extends Notification
 
     public $book;
     public $loan;
+    public $user;
 
     public function __construct(Book $book, BookLoan $loan)
     {
         $this->book = $book;
         $this->loan = $loan;
+        $this->user = $loan->user;
     }
 
     public function via($notifiable): array
@@ -28,11 +30,19 @@ class BookReturned extends Notification
 
     public function toDatabase($notifiable): array
     {
+        // Customize message based on recipient role
+        if ($notifiable->hasRole('admin') || $notifiable->hasRole('operator')) {
+            $message = "{$this->user->name} has returned \"{$this->book->title}\"";
+        } else {
+            $message = "You have returned \"{$this->book->title}\"";
+        }
+
         return [
-            'message' => 'You have returned "' . $this->book->title . '"',
+            'message' => $message,
             'book_id' => $this->book->id,
             'loan_id' => $this->loan->id,
-            'returned_date' => $this->loan->returned_date,
+            'user_id' => $this->user->id,
+            'due_date' => $this->loan->due_date,
             'type' => 'book_returned',
             'url' => route('books.show', $this->book)
         ];
@@ -40,11 +50,19 @@ class BookReturned extends Notification
 
     public function toArray($notifiable): array
     {
+        // Customize message based on recipient role
+        if ($notifiable->hasRole('admin') || $notifiable->hasRole('operator')) {
+            $message = "{$this->user->name} has returned \"{$this->book->title}\"";
+        } else {
+            $message = "You have returned \"{$this->book->title}\"";
+        }
+
         return [
-            'message' => 'You have returned "' . $this->book->title . '"',
+            'message' => $message,
             'book_id' => $this->book->id,
             'loan_id' => $this->loan->id,
-            'returned_date' => $this->loan->returned_date,
+            'user_id' => $this->user->id,
+            'due_date' => $this->loan->due_date,
             'type' => 'book_returned',
             'url' => route('books.show', $this->book)
         ];
