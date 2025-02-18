@@ -18,7 +18,7 @@
                         @if (Route::has('login'))
                         <nav class="flex justify-end flex-1 -mx-3">
                             @auth
-                            <a href="{{ url('/dashboard') }}"
+                            <a href="{{ route('dashboard') }}"
                                 class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
                                 Dashboard
                             </a>
@@ -39,33 +39,41 @@
                         @endif
                     </header>
 
-                    {{-- Hero --}}
-                    <div class="mx-auto">
+                    <!-- Hero -->
+                    <div class="max-w-2xl flex flex-col items-center justify-center h-[calc(100vh-10rem)] mx-auto">
                         <div class="hidden sm:mb-8 sm:flex sm:justify-center">
                             <div
-                                class="relative px-3 py-1 text-gray-600 rounded-full text-sm/6 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                                Announcing our next round of funding. <a href="#"
-                                    class="font-semibold text-indigo-600"><span class="absolute inset-0"
-                                        aria-hidden="true"></span>Read more <span aria-hidden="true">&rarr;</span></a>
+                                class="relative px-3 py-1 text-gray-600 rounded-full dark:text-gray-300 text-sm/6 ring-1 ring-gray-900/40 hover:ring-gray-900/50 dark:ring-gray-400/60 hover:dark:ring-gray-400/70">
+                                Announcing our next round of funding.
+                                <a href="#" class="font-semibold text-red-500">
+                                    <span class="absolute inset-0" aria-hidden="true"></span>
+                                    Read more <span aria-hidden="true">&rarr;</span>
+                                </a>
                             </div>
                         </div>
                         <div class="text-center">
-                            <h1 class="text-5xl font-semibold tracking-tight text-gray-900 text-balance sm:text-7xl">
-                                Data to enrich your online business</h1>
-                            <p class="mt-8 text-lg font-medium text-gray-500 text-pretty sm:text-xl/8">Anim
-                                aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat
-                                commodo. Elit sunt amet fugiat veniam occaecat.</p>
+                            <h1 class="text-5xl font-semibold tracking-tight text-black dark:text-white sm:text-7xl">
+                                Discover Your Next Great Read
+                            </h1>
+                            <p class="mt-8 text-lg font-medium text-gray-700 dark:text-gray-300 sm:text-xl/8">
+                                Explore our vast collection of books and immerse yourself in a world of knowledge and
+                                imagination.
+                            </p>
                             <div class="flex items-center justify-center mt-10 gap-x-6">
-                                <a href="#"
-                                    class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Get
-                                    started</a>
-                                <a href="#" class="font-semibold text-gray-900 text-sm/6">Learn more <span
-                                        aria-hidden="true">→</span></a>
+                                <a href="{{ route('register') }}"
+                                    class="rounded-md bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-red-400 focus-visible:outline-2 focus-visible:outline-offset-2">
+                                    Get started
+                                </a>
+                                <a href="#features"
+                                    class="font-semibold text-black dark:text-white hover:text-red-500 text-sm/6">
+                                    Learn more <span aria-hidden="true">→</span>
+                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid gap-6 py-10 lg:grid-cols-2 lg:gap-8">
+                    <!-- Features -->
+                    <div id="features" class="grid gap-6 py-10 lg:grid-cols-2 lg:gap-8">
                         <a href="{{ route('books.index') }}" id="docs-card"
                             class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
 
