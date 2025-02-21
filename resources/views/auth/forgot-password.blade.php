@@ -30,9 +30,9 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-primary-button>
+                    <x-forms.primary-button>
                         {{ __('Send Reset Link') }}
-                    </x-primary-button>
+                    </x-forms.primary-button>
                 </div>
             </form>
 
