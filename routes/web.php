@@ -8,10 +8,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [Controllers\DashboardController::class, 'index'])
-    ->middleware(['auth'])
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -34,6 +34,10 @@ Route::middleware('auth')->group(function () {
     // Loan
     Route::post('/loans', [Controllers\BookLoanController::class, 'store'])->name('loans.store');
     Route::post('/loans/{loan}/return', [Controllers\BookLoanController::class, 'return'])->name('loans.return');
+
+    // Menambahkan rute untuk meminjam dan mengembalikan buku
+    Route::post('books/{book}/borrow', [Controllers\BookLoanController::class, 'borrow'])->name('books.borrow');
+    Route::post('books/{book}/return', [Controllers\BookLoanController::class, 'return'])->name('books.return');
 });
 
 require __DIR__ . '/auth.php';

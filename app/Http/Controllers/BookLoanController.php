@@ -31,6 +31,11 @@ class BookLoanController extends Controller
             return back()->with('error', 'You have reached the maximum number of allowed loans.');
         }
 
+        // Ensure the user has verified their email before proceeding
+        if (auth()->user()->hasRole('visitor') && !auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         try {
             DB::transaction(function () use ($book) {
                 // Create loan record
@@ -62,6 +67,11 @@ class BookLoanController extends Controller
             return back()->with('error', 'This book has already been returned.');
         }
 
+        // Ensure the user has verified their email before proceeding
+        if (auth()->user()->hasRole('visitor') && !auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         try {
             DB::transaction(function () use ($loan) {
                 // Mark loan as returned
@@ -71,9 +81,6 @@ class BookLoanController extends Controller
 
                 // Make book available again
                 $loan->book->update(['is_available' => true]);
-
-                // Send notification
-                $loan->user->notify(new BookReturned($loan->book, $loan));
             });
 
             return back()->with('success', 'Book returned successfully.');
