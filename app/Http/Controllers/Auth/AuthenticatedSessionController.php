@@ -28,6 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Redirect admin users to Filament panel
+        if ($request->user()->hasRole('admin')) {
+            return redirect()->to('/admin');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

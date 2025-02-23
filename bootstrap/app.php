@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'prevent-admin-operator' => \App\Http\Middleware\PreventAdminOperatorRegistration::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'admin' => \App\Http\Middleware\AdminAccessMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
