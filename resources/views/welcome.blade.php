@@ -194,9 +194,26 @@
                     </div>
 
                     <footer class="py-16 text-center text-black text-md dark:text-white/70">
-                        &copy; {{ date('Y') }} <a class="hover:text-[#4F46E5] hover:underline" target="_blank"
-                            href="https://github.com/garinarka">Garinarka</a>. All
-                        rights reserved.
+                        <div class="flex flex-col items-center p-8 mx-auto">
+                            <nav class="flex space-x-6">
+                                <a href="#" class="transition hover:text-gray-500">About</a>
+                                <a href="#" class="transition hover:text-gray-500">Blog</a>
+                                <a href="#" class="transition hover:text-gray-500">Contact</a>
+                            </nav>
+                            <div class="flex mt-6 space-x-5">
+                                <a href="#"
+                                    class="text-3xl text-gray-600 transition hover:text-gray-400 dark:text-gray-500">
+                                    <i class="fa-brands fa-instagram"></i>
+                                </a>
+                                <a href="#"
+                                    class="text-3xl text-gray-600 transition hover:text-gray-400 dark:text-gray-500">
+                                    <i class="fa-brands fa-github"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <p>
+                            &copy; {{ date('Y') }} Garinarka. All rights reserved.
+                        </p>
                     </footer>
                 </div>
             </div>
